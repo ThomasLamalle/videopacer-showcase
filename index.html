@@ -1,74 +1,69 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>VideoPacer: timing race finishers from a video</title>
-<meta name="description" content="A Rust pipeline that finds bibs in a finish-line video, tracks them, reads the numbers and gives each runner a finish time.">
+<title>VideoPacer: race timing from a finish-line video</title>
+<meta name="description" content="Prototype that times race runners from a finish-line video: it finds the bibs, reads the numbers and gives each runner a finish time.">
 <style>
-:root{--bg:#fff;--fg:#1b1f24;--mut:#586069;--card:#f5f7f9;--line:#d8dee4;--acc:#0a7d3b}
-@media (prefers-color-scheme:dark){:root{--bg:#0f1317;--fg:#e6e9ec;--mut:#9aa5b1;--card:#171d23;--line:#2a323a;--acc:#4cd47e}}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.6 system-ui,sans-serif}
-main{max-width:780px;margin:0 auto;padding:40px 20px 80px}
-h1{font-size:2.2rem;margin:0 0 .2em}h2{margin:2.2em 0 .5em;font-size:1.35rem}
-p.lead{font-size:1.15rem;color:var(--mut);margin-top:0}
-img{max-width:100%;border-radius:8px;border:1px solid var(--line);display:block}
-.cap{font-size:.85rem;color:var(--mut);margin-top:.4em}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:1.2em 0}
-.stat{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px}
-.stat b{display:block;font-size:1.7rem;color:var(--acc)}.stat span{font-size:.85rem;color:var(--mut)}
-table{border-collapse:collapse;width:100%;font-size:.95rem}th,td{border-bottom:1px solid var(--line);padding:6px 10px;text-align:left}
-th{color:var(--mut);font-weight:600}td+td,th+th{text-align:right}
-code{background:var(--card);padding:1px 5px;border-radius:4px;font-size:.9em}
-.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:1em 0}
-.flow span{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:6px 10px;font-size:.9rem}
-.flow i{color:var(--mut);font-style:normal}
-details{margin-top:1em}a{color:var(--acc)}
-</style></head><body><main>
-<h1>VideoPacer</h1>
-<p class="lead">Times race runners from a finish-line video instead of chips: it finds the bibs, follows them, reads the numbers and gives each runner a finish time. Built in Rust to run on a phone.</p>
-<img src="assets/demo.gif" alt="Finish-line video with detected bibs boxed and numbers read" width="560">
-<p class="cap">The pipeline on a real finish line (Honolulu Marathon 2014): boxes come from the bib detector, the number above each box is the vote of the track.</p>
+:root{--bg:#0a0d12;--fg:#eef1f5;--mut:#94a0b0;--card:#121821;--line:#1f2937;--a:#ffd23f;--b:#4cc9f0}
+@media (prefers-color-scheme:light){:root{--bg:#fafbfc;--fg:#10151c;--mut:#5b6675;--card:#fff;--line:#e3e8ee;--a:#d99a00;--b:#0a7fb3}}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.65 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1000px;margin:0 auto;padding:0 24px}
+nav{display:flex;justify-content:space-between;align-items:center;padding:22px 0;font-weight:700;letter-spacing:-.01em}
+nav a{color:var(--mut);font-weight:500;font-size:.95rem;text-decoration:none}nav a:hover{color:var(--fg)}
+.hero{padding:56px 0 24px;text-align:center;background:radial-gradient(60% 60% at 50% 0,color-mix(in srgb,var(--b) 18%,transparent),transparent)}
+.tag{display:inline-block;font-size:.8rem;font-weight:600;color:var(--a);border:1px solid color-mix(in srgb,var(--a) 40%,transparent);border-radius:99px;padding:4px 12px;margin-bottom:18px}
+h1{font-size:clamp(2.4rem,6vw,4rem);line-height:1.05;letter-spacing:-.035em;margin:0 0 .4em}
+h1 em{font-style:normal;background:linear-gradient(90deg,var(--a),var(--b));-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{font-size:1.2rem;color:var(--mut);max-width:640px;margin:0 auto 36px}
+.shot{border-radius:16px;overflow:hidden;border:1px solid var(--line);box-shadow:0 30px 80px -30px rgba(0,0,0,.6)}
+.shot img{display:block;width:100%;height:auto}
+.cap{font-size:.85rem;color:var(--mut);margin:12px 0 0}
+section{padding:72px 0 0}
+h2{font-size:1.9rem;letter-spacing:-.025em;margin:0 0 .5em}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px}
+.card b{display:block;font-size:2.2rem;letter-spacing:-.03em;line-height:1.1}
+.card b small{font-size:1rem;color:var(--mut);font-weight:500}
+.card span{display:block;margin-top:6px;color:var(--mut);font-size:.92rem}
+p{color:var(--mut);max-width:680px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}.chips span{background:var(--card);border:1px solid var(--line);border-radius:99px;padding:6px 14px;font-size:.92rem}
+details{margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px 20px}
+summary{cursor:pointer;padding:14px 0;font-weight:600}
+table{border-collapse:collapse;width:100%;font-size:.95rem;margin-bottom:12px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right}th:first-child,td:first-child{text-align:left}th{color:var(--mut);font-weight:600}
+.cta{display:inline-block;margin-top:8px;background:var(--fg);color:var(--bg);padding:12px 22px;border-radius:10px;font-weight:600;text-decoration:none}
+footer{padding:72px 0 48px;color:var(--mut);font-size:.9rem}
+</style></head><body>
+<div class="wrap">
+<nav><span>VideoPacer</span><a href="https://github.com/ThomasLamalle/videopacer-showcase">GitHub</a></nav>
+<header class="hero">
+<span class="tag">Work in progress prototype</span>
+<h1>Finish times from <em>a video</em>,<br>no chips.</h1>
+<p class="lead">VideoPacer watches a finish line, finds each runner's bib, reads the number and gives every runner a finish time, live, on a phone.</p>
+<div class="shot"><img src="assets/demo.gif" alt="Demo: bibs detected on a finish line with a live race clock and leaderboard" width="1000"></div>
+<p class="cap" style="margin-inline:auto">Honolulu Marathon 2014 footage: detected bibs, race clock read from the video, live leaderboard.</p>
+</header>
 
-<div class="stats">
-<div class="stat"><b>175 / 187</b><span>bibs found, 17 ground-truth videos</span></div>
-<div class="stat"><b>170.5</b><span>finish times within 2 s of the truth (mean of 2 runs)</span></div>
-<div class="stat"><b>8.5</b><span>wrong numbers a run, mostly flagged for review</span></div>
-<div class="stat"><b>2.1×</b><span>real time on 4 CPU cores, no GPU</span></div>
+<section><h2>Results</h2>
+<p>Tested on 17 clips of 15 s from real races, labelled by hand and never used in training.</p>
+<div class="grid">
+<div class="card"><b>175<small> / 187</small></b><span>bibs found</span></div>
+<div class="card"><b>170<small> / 187</small></b><span>finish times within 2 seconds</span></div>
+<div class="card"><b>2.1×</b><span>real time on 4 CPU cores, no GPU</span></div>
+<div class="card"><b>0</b><span>chips, mats or hardware at the line</span></div>
 </div>
-
-<h2>The problem</h2>
-<p>A race needs a finish time for every runner. Chips need hardware at the line and a mat that can fail. A phone filming the line already sees every bib. The hard part is that bibs are small, tilted, partly hidden and crowded, and a reader that is wrong by one digit gives a wrong runner a wrong time.</p>
-<p>Every camera device runs the whole pipeline itself. A server only merges the passages from several devices and is never in the frame loop, so results are live and work with a poor connection.</p>
-
-<h2>How it works</h2>
-<div class="flow"><span>video frame</span><i>→</i><span>bib detector (640 px, 30 / s)</span><i>→</i><span>reader on each box</span><i>→</i><span>tracks by association</span><i>→</i><span>vote on the number</span><i>→</i><span>passage at the line</span></div>
-<ul>
-<li><b>Tracks, not a vote between numbers.</b> A box joins the track where its bib should be, from where it was and how fast it moved. A reader that drops a digit does it on the same bib, so inside one track the wrong reading just loses the vote. Between numbers, every failure would need its own rule.</li>
-<li><b>The number is the most likely source of the readings.</b> The reader drops a digit far more often than it adds one, so the track takes the number its readings most likely come from.</li>
-<li><b>Looking past the line.</b> The detector sees the whole frame and a passage is timed on its last box before the line. Bib errors fell from 36 to 27 and one sample from 8 errors to 1.</li>
-<li><b>A race list is optional.</b> It helps only if the numbers are sparse. Tests use a plain pattern (3 to 5 digits) and never the real list, since a list of the few bibs in a sample would be cheating.</li>
-</ul>
-
-<h2>Engineering story</h2>
-<p><b>Rebuilt from scratch, one reviewed piece at a time.</b> The first pipeline was written fast and grew too complex to maintain. I restarted the core from empty files and added back one idea per pull request. Each pull request carries the ground-truth numbers before and after, and a one-page explanation of the logic before and after.</p>
-<p><b>Core and cosmetic changes.</b> Anything that can change a number in a result (detector, reader, tracks, scoring) is a <i>core</i> change: explained first, one idea per pull request, and a rule that holds for any race, never a fix for one bib of one video. The rest (UI, tooling, docs) is cosmetic and merges when checks pass. Every pull request runs the ground-truth check in CI on a self-hosted runner and fails when more bibs are missed.</p>
-<p><b>Measure before believing.</b> A single run is noisy by up to 4 bibs depending on which frames the detector sees, so each video runs at two time offsets and the results are averaged. Replay tools run an idea over cached detections in seconds, and I learned that replays over-promise, so ideas are confirmed with a full run.</p>
-<p><b>Prefer removing a mechanism to adding one.</b> Several attractive ideas were measured and dropped, with the table kept in the roadmap:</p>
-<table><tr><th>Idea: partial readings vote for every race number containing them</th><th>Missed</th><th>Wrong</th></tr>
-<tr><td>Today</td><td>15.5</td><td>10</td></tr>
-<tr><td>Number that best explains the readings</td><td>12.5</td><td>27</td></tr>
-<tr><td>Only if 100× more likely than the next</td><td>14.5</td><td>18.5</td></tr></table>
-<p class="cap">A partial reading such as <code>415</code> fits 19 four-digit numbers, so finding bibs meant inventing wrong ones. Dropped. Missed bibs weigh more than wrong ones, because a wrong number can still be reviewed after the race.</p>
-<p><b>Speed is measured honestly.</b> Decoding is never counted, because a live camera gives frames for free. The unit is seconds of work per second of video. Today it is about 2.1× on 4 CPU cores; the goal is 0.5×. Running the detector less often was measured, not assumed: 9.5 missed bibs at 30 detections a second, 15 at 15, 27.5 at 6 (older measurement, replayed).</p>
-<p><b>Under review right now:</b> running the detector 15 times a second and reading the bibs on the frame halfway between detections cuts the time by 34% (2.14× to 1.41× real time) for 2 more missed bibs (12 to 14), with fewer wrong numbers (8.5 to 6.5). The check fails on purpose, since missed bibs come first, so the trade is a decision for the reviewer, not for the code.</p>
-
-<h2>Results</h2>
-<p>Ground truth is 17 clips of 15 s from real races (Honolulu 2014, Gold Coast 2024 and others), each labelled by hand and checked against the finish times. A clip is only used as a test if it was never used in training.</p>
-<details><summary>Per-video results</summary>
+<details><summary>Results per video</summary>
 <table><tr><th>Video</th><th>Bibs in truth</th><th>Found</th><th>Wrong</th></tr><tr><td>sample1</td><td>11</td><td>11</td><td>0</td></tr><tr><td>sample2</td><td>19</td><td>19</td><td>1</td></tr><tr><td>sample3</td><td>22</td><td>22</td><td>3</td></tr><tr><td>sample5</td><td>26</td><td>26</td><td>0</td></tr><tr><td>sample6</td><td>14</td><td>14</td><td>0</td></tr><tr><td>sample7</td><td>13</td><td>12</td><td>0</td></tr><tr><td>sample8</td><td>7</td><td>7</td><td>0</td></tr><tr><td>sample9</td><td>10</td><td>6</td><td>1</td></tr><tr><td>sample11</td><td>4</td><td>4</td><td>0</td></tr><tr><td>sample13</td><td>10</td><td>6</td><td>0</td></tr><tr><td>sample14</td><td>10</td><td>10</td><td>0</td></tr><tr><td>sample15</td><td>2</td><td>2</td><td>0</td></tr><tr><td>sample16</td><td>5</td><td>3</td><td>0</td></tr><tr><td>sample17</td><td>7</td><td>7</td><td>0</td></tr><tr><td>sample18</td><td>15</td><td>15</td><td>2</td></tr><tr><td>sample19</td><td>6</td><td>6</td><td>0</td></tr><tr><td>sample20</td><td>6</td><td>5</td><td>1</td></tr></table></details>
-<p><b>What is still open:</b> the missed bibs are at the floor of today's models (a detector that misses a 20 px bib, a reader that cannot read a hidden one). More bibs need better models, not more rules.</p>
+</section>
 
-<h2>Stack</h2>
-<p>Rust, ONNX Runtime (a small YOLO-family bib detector and a tiny PP-OCR-style digit reader, both trained on bibs), OpenCV for video, a Tauri 2 shell for Android, a small web review page for checking results against the truth, GitHub Actions for the ground-truth check and the APK.</p>
+<section><h2>Built for the phone</h2>
+<p>Each camera runs the whole pipeline itself. A server only merges the results of several cameras and is never in the frame loop, so it works live and with a weak connection. Android first, then PC and iPhone.</p>
+<div class="chips"><span>Rust</span><span>ONNX Runtime</span><span>OpenCV</span><span>Computer vision</span><span>Tauri 2 (Android)</span><span>GitHub Actions</span></div>
+</section>
 
-<h2>Code</h2>
-<p>The repository is private for now. The code and the per-change explanation pages can be shared on request.</p>
-</main></body></html>
+<section><h2>Code</h2>
+<p>The source is private while the project is in progress. Happy to walk through it or share access.</p>
+<a class="cta" href="https://github.com/ThomasLamalle">Get in touch via GitHub</a>
+</section>
+<footer>© Thomas Lamalle</footer>
+</div></body></html>
