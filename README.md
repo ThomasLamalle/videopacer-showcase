@@ -2,13 +2,13 @@
 
 Times race runners from a finish-line video instead of chips: it finds the bibs, reads the numbers and gives each runner a finish time, live, on a phone. Work in progress prototype, written in Rust.
 
-![Bibs detected on a finish line with a live race clock and leaderboard](assets/demo.gif)
+![A real run on the Honolulu Marathon finish: bib numbers, the race clock read from the gantry and a results list that fills as runners cross](assets/demo.gif)
 
-*Honolulu Marathon 2014 footage: detected bibs, race clock read from the video, live leaderboard.*
+*A real run on the Honolulu Marathon 2014 finish, one of the test clips: each bib's number, the race time read from the clock on the gantry, and each finish time as the runner crosses the line.*
 
 ## Results
 
-17 clips of 15 s from real races, labelled by hand and never used in training.
+17 clips from real races, 8 to 30 s each and 5 minutes in all, labelled by hand and never used in training.
 
 | | |
 |---|---|
