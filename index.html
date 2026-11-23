@@ -29,9 +29,9 @@ details{margin-top:1em}a{color:var(--acc)}
 
 <div class="stats">
 <div class="stat"><b>175 / 187</b><span>bibs found, 17 ground-truth videos</span></div>
-<div class="stat"><b>171</b><span>finish times within 2 s of the truth</span></div>
-<div class="stat"><b>8</b><span>wrong numbers (flagged or reviewable)</span></div>
-<div class="stat"><b>2.6×</b><span>real time on 4 CPU cores, no GPU</span></div>
+<div class="stat"><b>170.5</b><span>finish times within 2 s of the truth (mean of 2 runs)</span></div>
+<div class="stat"><b>8.5</b><span>wrong numbers a run, mostly flagged for review</span></div>
+<div class="stat"><b>2.1×</b><span>real time on 4 CPU cores, no GPU</span></div>
 </div>
 
 <h2>The problem</h2>
@@ -57,7 +57,8 @@ details{margin-top:1em}a{color:var(--acc)}
 <tr><td>Number that best explains the readings</td><td>12.5</td><td>27</td></tr>
 <tr><td>Only if 100× more likely than the next</td><td>14.5</td><td>18.5</td></tr></table>
 <p class="cap">A partial reading such as <code>415</code> fits 19 four-digit numbers, so finding bibs meant inventing wrong ones. Dropped. Missed bibs weigh more than wrong ones, because a wrong number can still be reviewed after the race.</p>
-<p><b>Speed is measured honestly.</b> Decoding is never counted, because a live camera gives frames for free. The unit is seconds of work per second of video. The current floor on the PC is about 2.6×; the goal is 0.5×. Running the detector less often was measured, not assumed: 9.5 missed bibs at 30 detections a second, 15 at 15, 27.5 at 6.</p>
+<p><b>Speed is measured honestly.</b> Decoding is never counted, because a live camera gives frames for free. The unit is seconds of work per second of video. Today it is about 2.1× on 4 CPU cores; the goal is 0.5×. Running the detector less often was measured, not assumed: 9.5 missed bibs at 30 detections a second, 15 at 15, 27.5 at 6 (older measurement, replayed).</p>
+<p><b>Under review right now:</b> running the detector 15 times a second and reading the bibs on the frame halfway between detections cuts the time by 34% (2.14× to 1.41× real time) for 2 more missed bibs (12 to 14), with fewer wrong numbers (8.5 to 6.5). The check fails on purpose, since missed bibs come first, so the trade is a decision for the reviewer, not for the code.</p>
 
 <h2>Results</h2>
 <p>Ground truth is 17 clips of 15 s from real races (Honolulu 2014, Gold Coast 2024 and others), each labelled by hand and checked against the finish times. A clip is only used as a test if it was never used in training.</p>
