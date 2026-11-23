@@ -1,18 +1,20 @@
-"""Draw the showcase demo: a run's boxes, numbers and finish times over its video, with a results sheet beside it.
+"""Draw a clip of the showcase demo: a run's boxes, numbers and finish times over its video, with a results sheet beside it.
 
-It writes assets/demo.mp4 for the page, assets/demo.jpg as its poster and assets/demo.gif for the README.
+It writes <out>.mp4 and, as its poster, <out>.jpg. The page plays the clips of assets/demo-*.mp4 one after the other.
 
-To make it again, on the VPS:
-1. Run the pipeline on the clip, from the VideoPacer repository:
-     ./target/release/videopacer videos/sample19/video.mp4 <run folder>
+To make a clip again, on the VPS:
+1. Run the pipeline on it, from the VideoPacer repository:
+     ./target/release/videopacer videos/<sample>/video.mp4 <run folder>
 2. Get the two fonts, Red Hat Display and Red Hat Text:
      curl -sSL -o <fonts>/display.ttf "https://github.com/google/fonts/raw/main/ofl/redhatdisplay/RedHatDisplay%5Bwght%5D.ttf"
      curl -sSL -o <fonts>/text.ttf "https://github.com/google/fonts/raw/main/ofl/redhattext/RedHatText%5Bwght%5D.ttf"
-3. Draw it (needs ffmpeg), up to a last frame, with the picture at a poster frame as the video's poster. Cut before
-   the end when tracks still open at the end of the clip finish there all at once.
-     uv run --with pillow scripts/render_demo.py <video.mp4> <run folder>/summary.json <fonts> assets <last> <poster>
-   The page's demo is sample19: every bib and finish time right, and its race clock is read:
-     ... assets 1197 1036
+3. Draw it (needs ffmpeg), up to a last frame, with the picture at a poster frame as the poster. Cut before the end
+   when tracks still open at the end of the clip finish there all at once.
+     uv run --with pillow scripts/render_demo.py <video.mp4> <run folder>/summary.json <fonts> assets/demo-<sample> <last> <poster>
+   The page's clips, the best 4 of the first 13 samples on 2026-11-23, with their last and poster frames:
+     sample2 870 700, sample6 899 750, sample8 373 320, sample11 299 200
+4. The README's GIF, from the first clip:
+     ffmpeg -t 20 -i assets/demo-sample2.mp4 -vf "fps=7,scale=640:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=80:stats_mode=diff[p];[b][p]paletteuse=dither=none:diff_mode=rectangle" assets/demo.gif
 """
 import json
 import subprocess
@@ -20,9 +22,9 @@ import sys
 
 from PIL import Image, ImageDraw, ImageFont
 
-video, summary, fonts, assets = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
+video, summary, fonts, name = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
 last, poster = int(sys.argv[5]), int(sys.argv[6])
-out = f"{assets}/demo.mp4"
+out = f"{name}.mp4"
 run = json.load(open(summary))
 
 probe = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v", "-show_entries", "stream=width,r_frame_rate",
@@ -164,12 +166,8 @@ for frame in range(last + 1):
     canvas = Image.alpha_composite(canvas, overlay(frame))
     sheet(canvas, frame)
     if frame == poster:
-        canvas.convert("RGB").save(f"{assets}/demo.jpg", quality=80)
+        canvas.convert("RGB").save(f"{name}.jpg", quality=80)
     encode.stdin.write(canvas.convert("RGB").tobytes())
 encode.stdin.close()
 encode.wait()
-# The README's GIF: the first 20 s at 7 frames a second, small enough for GitHub to show.
-subprocess.run(["ffmpeg", "-v", "error", "-y", "-t", "20", "-i", out, "-vf",
-                "fps=7,scale=640:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=80:stats_mode=diff[p];"
-                "[b][p]paletteuse=dither=none:diff_mode=rectangle", f"{assets}/demo.gif"], check=True)
 print("frames", frame + 1, "finishers", len(finishers))

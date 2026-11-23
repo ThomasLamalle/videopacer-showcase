@@ -2,9 +2,9 @@
 
 Times race runners from a finish-line video instead of chips: it finds the bibs, reads the numbers and gives each runner a finish time, live, on a phone. Work in progress prototype, written in Rust.
 
-![A real run on a 5K finish: bib numbers, the race clock read from the video and a results list that fills as runners cross](assets/demo.gif)
+![A real run on the Honolulu Marathon finish: bib numbers, the race clock read from the gantry and a results list that fills as runners cross](assets/demo.gif)
 
-*A real run on a 20 s test clip of the Angels on the Run 5K (2026), one where every bib and every finish time is right: the number on each bib, the race time read from the clock beside the line, and each finish time as the runner crosses.*
+*A real run on 30 s of the Honolulu Marathon 2014 finish, one of the best test clips: 19 of 19 bibs found, none wrong, 18 finish times within 2 s. The race time is read from the clock on the gantry. The [page](https://thomaslamalle.github.io/videopacer-showcase/) shows three more clips.*
 
 ## Results
 

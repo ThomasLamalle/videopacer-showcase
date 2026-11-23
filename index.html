@@ -28,7 +28,15 @@ h1{font-weight:800;font-size:clamp(2.9rem,7.6vw,5.6rem);line-height:.98;letter-s
 .status::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--cobalt)}
 .demo{margin:0}
 .demo video{display:block;width:100%;height:auto;border:1px solid var(--rule);border-radius:10px;background:#fff}
-.demo figcaption{color:var(--mut);font-size:.92rem;margin-top:12px;max-width:44em}
+.demo figcaption{color:var(--mut);font-size:.92rem;margin-top:10px;max-width:44em}
+/* The clips of the demo: a bar on top of each fills as its clip plays. */
+.clips{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}
+.clips button{all:unset;display:block;cursor:pointer;position:relative;padding:12px 0 2px;font:600 .95rem var(--text);color:var(--mut);border-top:3px solid var(--rule)}
+.clips button::before{content:"";position:absolute;top:-3px;left:0;height:3px;width:calc(var(--done,0) * 100%);background:var(--cobalt);transition:width .25s linear}
+.clips button[aria-pressed="true"]{color:var(--ink)}
+.clips button:hover{color:var(--ink)}
+.clips button:focus-visible{outline:2px solid var(--cobalt);outline-offset:4px}
+@media (max-width:560px){.clips{grid-template-columns:1fr 1fr;gap:4px 12px}}
 
 section{padding:104px 0 0}
 h2{font-weight:800;font-size:clamp(2rem,4vw,2.6rem);line-height:1.05;letter-spacing:-.025em;margin:0 0 14px}
@@ -71,8 +79,14 @@ footer a{color:inherit;text-decoration:none}footer a:hover{color:var(--ink)}
 <p class="lead">VideoPacer watches a finish line, finds each runner's bib, reads the number and gives every runner a finish time, live, on a phone.</p>
 <p class="status">Work in progress prototype</p>
 <figure class="demo">
-<video src="assets/demo.mp4" poster="assets/demo.jpg" width="1452" height="648" autoplay muted loop playsinline aria-label="A real run on a 5K finish: a box and number on each bib, the race clock read from the video, and a results list that fills as runners cross the line"></video>
-<figcaption>A real run on a 20 s test clip of the Angels on the Run 5K (2026), one where every bib and every finish time is right: the number on each bib, the race time read from the clock beside the line, and each finish time as the runner crosses.</figcaption>
+<video src="assets/demo-sample2.mp4" poster="assets/demo-sample2.jpg" width="1452" height="648" autoplay muted playsinline aria-label="A real run on a race finish: a box and number on each bib, and a results list that fills as runners cross the line"></video>
+<div class="clips">
+<button aria-pressed="true" data-clip="sample2" data-caption="Honolulu Marathon 2014, 30 s: 19 of 19 bibs found, none wrong, 18 finish times within 2 s. The race time is read from the clock on the gantry.">Honolulu Marathon</button>
+<button aria-pressed="false" data-clip="sample6" data-caption="Troy Turkey Trot 2019, 30 s: 14 of 14 bibs found, none wrong, 12 finish times within 2 s. The race time is read from the clock on the arch.">Troy Turkey Trot</button>
+<button aria-pressed="false" data-clip="sample8" data-caption="A 5 km in France, 15 s: 7 of 7 bibs found, none wrong, all 7 finish times within 2 s. No race clock in view, so times count from the start of the video.">5 km in France</button>
+<button aria-pressed="false" data-clip="sample11" data-caption="Good Life Halfsy 2026, 10 s: 4 of 4 bibs found, none wrong, all 4 finish times within 2 s. No race clock in view, so times count from the start of the video.">Good Life Halfsy</button>
+</div>
+<figcaption><span id="clip">Honolulu Marathon 2014, 30 s: 19 of 19 bibs found, none wrong, 18 finish times within 2 s. The race time is read from the clock on the gantry.</span> Real runs on four of the best test clips; the results below cover all 17.</figcaption>
 </figure>
 </header>
 
@@ -104,7 +118,23 @@ footer a{color:inherit;text-decoration:none}footer a:hover{color:var(--ink)}
 <footer><span>© Thomas Lamalle</span><a href="https://www.linkedin.com/in/thomas-lamalle-4a358b94/">LinkedIn</a></footer>
 </div>
 <script>
-// Respect reduced motion: show the first frame with controls instead of playing on its own.
-if (matchMedia('(prefers-reduced-motion: reduce)').matches) { const v = document.querySelector('video'); v.removeAttribute('autoplay'); v.pause(); v.controls = true; }
+// The demo plays its clips one after the other; a button jumps to a clip, and its bar shows how far that clip is.
+const video = document.querySelector('.demo video'), clips = [...document.querySelectorAll('.clips button')];
+// With reduced motion, nothing plays on its own: the first frame shows with controls.
+const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let current = 0;
+function show(index, play) {
+  current = index;
+  const clip = clips[index].dataset.clip;
+  video.poster = `assets/demo-${clip}.jpg`;
+  video.src = `assets/demo-${clip}.mp4`;
+  document.getElementById('clip').textContent = clips[index].dataset.caption;
+  clips.forEach((button, other) => { button.setAttribute('aria-pressed', other === index); button.style.setProperty('--done', 0); });
+  if (play) video.play().catch(() => {});
+}
+if (still) { video.removeAttribute('autoplay'); video.pause(); video.controls = true; }
+video.addEventListener('timeupdate', () => clips[current].style.setProperty('--done', video.currentTime / video.duration || 0));
+video.addEventListener('ended', () => show((current + 1) % clips.length, !still));
+clips.forEach((button, index) => button.addEventListener('click', () => show(index, true)));
 </script>
 </body></html>
