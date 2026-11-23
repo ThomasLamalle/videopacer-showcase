@@ -47,20 +47,20 @@ footer{padding:72px 0 48px;color:var(--mut);font-size:.9rem}
 <section><h2>Results</h2>
 <p>Tested on 17 clips of 15 s from real races, labelled by hand and never used in training.</p>
 <div class="grid">
-<div class="card"><b>94%<small> found</small></b><span>175 of 187 bibs read correctly</span></div>
-<div class="card"><b>91%<small> on time</small></b><span>170 of 187 finish times within 2 seconds</span></div>
-<div class="card"><b>14<small> fps</small></b><span>on 4 CPU cores, no GPU</span></div>
-<div class="card"><b>4.5%<small> wrong</small></b><span>8.5 of 187 bibs read as another number, a run on average</span></div>
+<div class="card"><b>92%<small> found</small></b><span>172 of 187 bibs read correctly</span></div>
+<div class="card"><b>89%<small> on time</small></b><span>166 of 187 finish times within 2 seconds</span></div>
+<div class="card"><b>33<small> fps</small></b><span>on 4 CPU cores, no GPU: faster than a 30 fps camera</span></div>
+<div class="card"><b>3.7%<small> wrong</small></b><span>7 of 187 bibs read as another number, a run on average</span></div>
 </div>
-<details><summary>Results per video</summary>
-<table><tr><th>Video</th><th>Bibs in truth</th><th>Found</th><th>Wrong</th></tr><tr><td>sample1</td><td>11</td><td>11</td><td>0</td></tr><tr><td>sample2</td><td>19</td><td>19</td><td>1</td></tr><tr><td>sample3</td><td>22</td><td>22</td><td>3</td></tr><tr><td>sample5</td><td>26</td><td>26</td><td>0</td></tr><tr><td>sample6</td><td>14</td><td>14</td><td>0</td></tr><tr><td>sample7</td><td>13</td><td>12</td><td>0</td></tr><tr><td>sample8</td><td>7</td><td>7</td><td>0</td></tr><tr><td>sample9</td><td>10</td><td>6</td><td>1</td></tr><tr><td>sample11</td><td>4</td><td>4</td><td>0</td></tr><tr><td>sample13</td><td>10</td><td>6</td><td>0</td></tr><tr><td>sample14</td><td>10</td><td>10</td><td>0</td></tr><tr><td>sample15</td><td>2</td><td>2</td><td>0</td></tr><tr><td>sample16</td><td>5</td><td>3</td><td>0</td></tr><tr><td>sample17</td><td>7</td><td>7</td><td>0</td></tr><tr><td>sample18</td><td>15</td><td>15</td><td>2</td></tr><tr><td>sample19</td><td>6</td><td>6</td><td>0</td></tr><tr><td>sample20</td><td>6</td><td>5</td><td>1</td></tr></table></details>
+<details><summary>Results per video (mean of 2 runs)</summary>
+<table><tr><th>Video</th><th>Bibs in truth</th><th>Found</th><th>Wrong</th></tr><tr><td>sample1</td><td>11</td><td>10.5</td><td>1</td></tr><tr><td>sample2</td><td>19</td><td>19</td><td>0</td></tr><tr><td>sample3</td><td>22</td><td>22</td><td>2</td></tr><tr><td>sample5</td><td>26</td><td>25.5</td><td>0.5</td></tr><tr><td>sample6</td><td>14</td><td>14</td><td>0</td></tr><tr><td>sample7</td><td>13</td><td>11.5</td><td>0.5</td></tr><tr><td>sample8</td><td>7</td><td>7</td><td>0</td></tr><tr><td>sample9</td><td>10</td><td>6.5</td><td>1</td></tr><tr><td>sample11</td><td>4</td><td>4</td><td>0</td></tr><tr><td>sample13</td><td>10</td><td>5.5</td><td>0.5</td></tr><tr><td>sample14</td><td>10</td><td>9</td><td>0</td></tr><tr><td>sample15</td><td>2</td><td>1.5</td><td>0</td></tr><tr><td>sample16</td><td>5</td><td>3</td><td>0</td></tr><tr><td>sample17</td><td>7</td><td>7</td><td>0</td></tr><tr><td>sample18</td><td>15</td><td>15</td><td>1.5</td></tr><tr><td>sample19</td><td>6</td><td>6</td><td>0</td></tr><tr><td>sample20</td><td>6</td><td>5</td><td>0</td></tr></table></details>
 </section>
 
 <section><h2>Stack</h2>
 <p>Each camera runs the whole pipeline itself. A server only merges the results of several cameras and is never in the frame loop, so it works live and with a weak connection. Android first, then PC and iPhone.</p>
 <div class="grid">
 <div class="card"><h3>Computer vision</h3><ul><li>Small YOLO-family bib detector</li><li>PP-OCR-style digit reader</li><li>Models trained on bibs, exported to ONNX (int8 and fp32)</li><li>OpenCV for video and image work</li></ul></div>
-<div class="card"><h3>Core</h3><ul><li>Rust, no garbage collector, no Python at run time</li><li>ONNX Runtime inference on CPU</li><li>Frame-by-frame streaming with bounded memory</li><li>Benchmarked in frames per second</li></ul></div>
+<div class="card"><h3>Core</h3><ul><li>Rust, no garbage collector, no Python at run time</li><li>ONNX Runtime inference on CPU</li><li>Frame-by-frame streaming with bounded memory</li><li>Tracking lets the detector run on every other frame, mostly around known runners</li><li>Benchmarked in frames per second</li></ul></div>
 <div class="card"><h3>App</h3><ul><li>Tauri 2 shell for Android</li><li>Embedded web review page and leaderboard</li><li>Race clock read from the video</li></ul></div>
 <div class="card"><h3>Tooling</h3><ul><li>Hand-labelled ground truth with automated scoring</li><li>GitHub Actions, self-hosted runner, APK build</li><li>Models and datasets on Hugging Face</li></ul></div>
 </div></section>

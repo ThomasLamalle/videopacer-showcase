@@ -12,17 +12,17 @@ Times race runners from a finish-line video instead of chips: it finds the bibs,
 
 | | |
 |---|---|
-| Bibs found | 94% (175 of 187) |
-| Finish times within 2 s | 91% (170 of 187) |
-| Wrong numbers | 4.5% (8.5 of 187 a run on average) |
-| Speed | about 14 frames per second on 4 CPU cores, no GPU |
+| Bibs found | 92% (172 of 187) |
+| Finish times within 2 s | 89% (166 of 187) |
+| Wrong numbers | 3.7% (7 of 187 a run on average) |
+| Speed | about 33 frames per second on 4 CPU cores, no GPU: faster than a 30 fps camera |
 
 ## Stack
 
 Each camera runs the whole pipeline itself. A server only merges the results of several cameras and is never in the frame loop. Android first, then PC and iPhone.
 
 - **Computer vision:** small YOLO-family bib detector, PP-OCR-style digit reader, models trained on bibs and exported to ONNX (int8 and fp32), OpenCV.
-- **Core:** Rust, ONNX Runtime on CPU, frame-by-frame streaming with bounded memory, speed benchmarked in frames per second.
+- **Core:** Rust, ONNX Runtime on CPU, frame-by-frame streaming with bounded memory, tracking that lets the detector run on every other frame, mostly around known runners, speed benchmarked in frames per second.
 - **App:** Tauri 2 shell for Android, embedded web review page and leaderboard, race clock read from the video.
 - **Tooling:** hand-labelled ground truth with automated scoring, GitHub Actions (self-hosted runner, APK build), models and datasets on Hugging Face.
 
