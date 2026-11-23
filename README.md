@@ -12,8 +12,9 @@ Times race runners from a finish-line video instead of chips: it finds the bibs,
 
 | | |
 |---|---|
-| Bibs found | 175 of 187 |
-| Finish times within 2 s | 170 of 187 |
+| Bibs found | 94% (175 of 187) |
+| Finish times within 2 s | 91% (170 of 187) |
+| Wrong numbers | 4.5% (8.5 of 187 a run on average) |
 | Speed | about 14 frames per second on 4 CPU cores, no GPU |
 
 ## Stack
