@@ -16,14 +16,19 @@ Times race runners from a finish-line video instead of chips: it finds the bibs,
 | Finish times within 2 s | 170 of 187 |
 | Speed | 2.1x real time on 4 CPU cores, no GPU |
 
-## Built for the phone
+## Stack
 
 Each camera runs the whole pipeline itself. A server only merges the results of several cameras and is never in the frame loop. Android first, then PC and iPhone.
 
-Rust, ONNX Runtime, OpenCV, Tauri 2, GitHub Actions.
+- **Computer vision:** small YOLO-family bib detector, PP-OCR-style digit reader, models trained on bibs and exported to ONNX (int8 and fp32), OpenCV.
+- **Core:** Rust, ONNX Runtime on CPU, frame-by-frame streaming with bounded memory, speed benchmarked in real-time multiples.
+- **App:** Tauri 2 shell for Android, embedded web review page and leaderboard, race clock read from the video.
+- **Tooling:** hand-labelled ground truth with automated scoring, GitHub Actions (self-hosted runner, APK build), models and datasets on Hugging Face.
 
 ## Code
 
 The source is private while the project is in progress. Happy to walk through it or share access.
+
+Contact: [LinkedIn](https://www.linkedin.com/in/thomas-lamalle-4a358b94/)
 
 Site: https://thomaslamalle.github.io/videopacer-showcase/

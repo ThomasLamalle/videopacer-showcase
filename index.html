@@ -26,7 +26,7 @@ h2{font-size:1.9rem;letter-spacing:-.025em;margin:0 0 .5em}
 .card b small{font-size:1rem;color:var(--mut);font-weight:500}
 .card span{display:block;margin-top:6px;color:var(--mut);font-size:.92rem}
 p{color:var(--mut);max-width:680px}
-.chips{display:flex;flex-wrap:wrap;gap:8px}.chips span{background:var(--card);border:1px solid var(--line);border-radius:99px;padding:6px 14px;font-size:.92rem}
+ul{margin:.6em 0 0;padding-left:1.1em;color:var(--mut);font-size:.93rem}li{margin:.3em 0}.card h3{margin:0;font-size:1.05rem}.chips{display:flex;flex-wrap:wrap;gap:8px}.chips span{background:var(--card);border:1px solid var(--line);border-radius:99px;padding:6px 14px;font-size:.92rem}
 details{margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px 20px}
 summary{cursor:pointer;padding:14px 0;font-weight:600}
 table{border-collapse:collapse;width:100%;font-size:.95rem;margin-bottom:12px}
@@ -35,7 +35,7 @@ th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right}th:f
 footer{padding:72px 0 48px;color:var(--mut);font-size:.9rem}
 </style></head><body>
 <div class="wrap">
-<nav><span>VideoPacer</span><a href="https://github.com/ThomasLamalle/videopacer-showcase">GitHub</a></nav>
+<nav><span>VideoPacer</span><span><a href="https://www.linkedin.com/in/thomas-lamalle-4a358b94/">LinkedIn</a> &nbsp; <a href="https://github.com/ThomasLamalle/videopacer-showcase">GitHub</a></span></nav>
 <header class="hero">
 <span class="tag">Work in progress prototype</span>
 <h1>Finish times from <em>a video</em>,<br>no chips.</h1>
@@ -56,14 +56,18 @@ footer{padding:72px 0 48px;color:var(--mut);font-size:.9rem}
 <table><tr><th>Video</th><th>Bibs in truth</th><th>Found</th><th>Wrong</th></tr><tr><td>sample1</td><td>11</td><td>11</td><td>0</td></tr><tr><td>sample2</td><td>19</td><td>19</td><td>1</td></tr><tr><td>sample3</td><td>22</td><td>22</td><td>3</td></tr><tr><td>sample5</td><td>26</td><td>26</td><td>0</td></tr><tr><td>sample6</td><td>14</td><td>14</td><td>0</td></tr><tr><td>sample7</td><td>13</td><td>12</td><td>0</td></tr><tr><td>sample8</td><td>7</td><td>7</td><td>0</td></tr><tr><td>sample9</td><td>10</td><td>6</td><td>1</td></tr><tr><td>sample11</td><td>4</td><td>4</td><td>0</td></tr><tr><td>sample13</td><td>10</td><td>6</td><td>0</td></tr><tr><td>sample14</td><td>10</td><td>10</td><td>0</td></tr><tr><td>sample15</td><td>2</td><td>2</td><td>0</td></tr><tr><td>sample16</td><td>5</td><td>3</td><td>0</td></tr><tr><td>sample17</td><td>7</td><td>7</td><td>0</td></tr><tr><td>sample18</td><td>15</td><td>15</td><td>2</td></tr><tr><td>sample19</td><td>6</td><td>6</td><td>0</td></tr><tr><td>sample20</td><td>6</td><td>5</td><td>1</td></tr></table></details>
 </section>
 
-<section><h2>Built for the phone</h2>
+<section><h2>Stack</h2>
 <p>Each camera runs the whole pipeline itself. A server only merges the results of several cameras and is never in the frame loop, so it works live and with a weak connection. Android first, then PC and iPhone.</p>
-<div class="chips"><span>Rust</span><span>ONNX Runtime</span><span>OpenCV</span><span>Computer vision</span><span>Tauri 2 (Android)</span><span>GitHub Actions</span></div>
-</section>
+<div class="grid">
+<div class="card"><h3>Computer vision</h3><ul><li>Small YOLO-family bib detector</li><li>PP-OCR-style digit reader</li><li>Models trained on bibs, exported to ONNX (int8 and fp32)</li><li>OpenCV for video and image work</li></ul></div>
+<div class="card"><h3>Core</h3><ul><li>Rust, no garbage collector, no Python at run time</li><li>ONNX Runtime inference on CPU</li><li>Frame-by-frame streaming with bounded memory</li><li>Benchmarked in real-time multiples</li></ul></div>
+<div class="card"><h3>App</h3><ul><li>Tauri 2 shell for Android</li><li>Embedded web review page and leaderboard</li><li>Race clock read from the video</li></ul></div>
+<div class="card"><h3>Tooling</h3><ul><li>Hand-labelled ground truth with automated scoring</li><li>GitHub Actions, self-hosted runner, APK build</li><li>Models and datasets on Hugging Face</li></ul></div>
+</div></section>
 
 <section><h2>Code</h2>
 <p>The source is private while the project is in progress. Happy to walk through it or share access.</p>
-<a class="cta" href="https://github.com/ThomasLamalle">Get in touch via GitHub</a>
+<a class="cta" href="https://www.linkedin.com/in/thomas-lamalle-4a358b94/">Get in touch on LinkedIn</a>
 </section>
-<footer>© Thomas Lamalle</footer>
+<footer>© Thomas Lamalle · <a href="https://www.linkedin.com/in/thomas-lamalle-4a358b94/" style="color:inherit">LinkedIn</a></footer>
 </div></body></html>
