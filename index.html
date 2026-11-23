@@ -2,55 +2,82 @@
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>VideoPacer: race timing from a finish-line video</title>
 <meta name="description" content="Prototype that times race runners from a finish-line video: it finds the bibs, reads the numbers and gives each runner a finish time.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0a0d12;--fg:#eef1f5;--mut:#94a0b0;--card:#121821;--line:#1f2937;--a:#ffd23f;--b:#4cc9f0}
-@media (prefers-color-scheme:light){:root{--bg:#fafbfc;--fg:#10151c;--mut:#5b6675;--card:#fff;--line:#e3e8ee;--a:#d99a00;--b:#0a7fb3}}
+/* The finish gantry and its race clock: night blue, with amber digits. The board of results stays a clock in both modes. */
+:root{
+  --gantry:#0b1b45;--clock:#06112e;--amber:#ffb21e;
+  --bg:#0b1b45;--ink:#eef2fb;--mut:#a3afcc;--line:#24397a;--accent:#ffb21e;
+  --narrow:"wdth" 62;--semi:"wdth" 80;
+}
+@media (prefers-color-scheme:light){:root{--bg:#f3f5fa;--ink:#0b1b45;--mut:#525f86;--line:#d3daec;--accent:#a35f00}}
 *{box-sizing:border-box}html{scroll-behavior:smooth}
-body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.65 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
-.wrap{max-width:1000px;margin:0 auto;padding:0 24px}
-nav{display:flex;justify-content:space-between;align-items:center;padding:22px 0;font-weight:700;letter-spacing:-.01em}
-nav a{color:var(--mut);font-weight:500;font-size:.95rem;text-decoration:none}nav a:hover{color:var(--fg)}
-.hero{padding:56px 0 24px;text-align:center;background:radial-gradient(60% 60% at 50% 0,color-mix(in srgb,var(--b) 18%,transparent),transparent)}
-.tag{display:inline-block;font-size:.8rem;font-weight:600;color:var(--a);border:1px solid color-mix(in srgb,var(--a) 40%,transparent);border-radius:99px;padding:4px 12px;margin-bottom:18px}
-h1{font-size:clamp(2.4rem,6vw,4rem);line-height:1.05;letter-spacing:-.035em;margin:0 0 .4em}
-h1 em{font-style:normal;background:linear-gradient(90deg,var(--a),var(--b));-webkit-background-clip:text;background-clip:text;color:transparent}
-.lead{font-size:1.2rem;color:var(--mut);max-width:640px;margin:0 auto 36px}
-.shot{border-radius:16px;overflow:hidden;border:1px solid var(--line);box-shadow:0 30px 80px -30px rgba(0,0,0,.6)}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 Archivo,"Arial Narrow",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit}a:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
+.wrap{max-width:1040px;margin:0 auto;padding:0 24px}
+nav{display:flex;justify-content:space-between;align-items:baseline;padding:24px 0}
+.mark{font-weight:850;font-size:1.35rem;font-variation-settings:var(--narrow);letter-spacing:.01em}
+nav a{color:var(--mut);font-size:.95rem;text-decoration:none;margin-left:20px}nav a:hover{color:var(--ink)}
+
+.hero{padding:56px 0 0}
+.status{display:inline-flex;align-items:center;gap:10px;color:var(--mut);font-size:.95rem;margin:0 0 20px}
+.status::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--amber);box-shadow:0 0 0 4px color-mix(in srgb,var(--amber) 25%,transparent)}
+h1{font-weight:850;font-variation-settings:var(--narrow);font-size:clamp(3.2rem,10vw,7rem);line-height:.9;letter-spacing:-.005em;margin:0 0 28px;max-width:11ch}
+.lead{font-size:1.25rem;line-height:1.5;color:var(--mut);max-width:34em;margin:0 0 44px}
+.shot{border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--clock)}
 .shot img{display:block;width:100%;height:auto}
-.cap{font-size:.85rem;color:var(--mut);margin:12px 0 0}
-section{padding:72px 0 0}
-h2{font-size:1.9rem;letter-spacing:-.025em;margin:0 0 .5em}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px}
-.card b{display:block;font-size:2.2rem;letter-spacing:-.03em;line-height:1.1}
-.card b small{font-size:1rem;color:var(--mut);font-weight:500}
-.card span{display:block;margin-top:6px;color:var(--mut);font-size:.92rem}
-p{color:var(--mut);max-width:680px}
-ul{margin:.6em 0 0;padding-left:1.1em;color:var(--mut);font-size:.93rem}li{margin:.3em 0}.card h3{margin:0;font-size:1.05rem}.chips{display:flex;flex-wrap:wrap;gap:8px}.chips span{background:var(--card);border:1px solid var(--line);border-radius:99px;padding:6px 14px;font-size:.92rem}
-details{margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px 20px}
-summary{cursor:pointer;padding:14px 0;font-weight:600}
-table{border-collapse:collapse;width:100%;font-size:.95rem;margin-bottom:12px}
-th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right}th:first-child,td:first-child{text-align:left}th{color:var(--mut);font-weight:600}
-.cta{display:inline-block;margin-top:8px;background:var(--fg);color:var(--bg);padding:12px 22px;border-radius:10px;font-weight:600;text-decoration:none}
-footer{padding:72px 0 48px;color:var(--mut);font-size:.9rem}
+.cap{font-size:.88rem;color:var(--mut);margin:12px 0 0}
+
+section{padding:96px 0 0}
+h2{font-weight:800;font-variation-settings:var(--semi);font-size:2.4rem;line-height:1.05;letter-spacing:-.01em;margin:0 0 14px}
+p{color:var(--mut);max-width:40em;margin:0 0 28px}
+
+/* The results, as the race clock of a finish gantry. */
+.board{display:grid;grid-template-columns:repeat(4,1fr);background:var(--clock);border:1px solid #1c2f66;border-radius:6px;color:#eef2fb}
+.board>div{padding:28px 24px 26px;border-left:1px solid #1c2f66}.board>div:first-child{border-left:0}
+.board b{display:block;font-weight:800;font-variation-settings:var(--narrow);font-size:clamp(3.4rem,7vw,4.8rem);line-height:.95;color:var(--amber);font-variant-numeric:tabular-nums;text-shadow:0 0 22px rgba(255,178,30,.35)}
+.board b small{font-size:.5em;margin-left:2px}
+.board strong{display:block;font-size:1.05rem;margin:10px 0 4px}
+.board span{display:block;color:#a3afcc;font-size:.9rem;line-height:1.45}
+@media (max-width:760px){.board{grid-template-columns:1fr 1fr}.board>div:nth-child(3){border-left:0}.board>div:nth-child(n+3){border-top:1px solid #1c2f66}}
+
+details{margin-top:18px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+summary{cursor:pointer;padding:16px 0;font-weight:650;color:var(--ink)}
+table{border-collapse:collapse;width:100%;font-size:.95rem;margin:4px 0 18px;font-variant-numeric:tabular-nums}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right}th:first-child,td:first-child{text-align:left;padding-left:0}
+th{color:var(--mut);font-weight:600}
+
+.stack{display:grid;grid-template-columns:repeat(4,1fr);gap:28px}
+.stack h3{font-weight:800;font-variation-settings:var(--semi);font-size:1.25rem;margin:0;padding-top:14px;border-top:2px solid var(--accent)}
+.stack ul{margin:10px 0 0;padding:0;list-style:none;color:var(--mut);font-size:.95rem}
+.stack li{padding:7px 0;border-bottom:1px solid var(--line)}
+@media (max-width:860px){.stack{grid-template-columns:1fr 1fr}}
+@media (max-width:520px){.stack{grid-template-columns:1fr}}
+
+.cta{display:inline-block;background:var(--amber);color:var(--gantry);padding:13px 24px;border-radius:6px;font-weight:700;text-decoration:none}
+.cta:hover{background:#ffc552}
+footer{margin-top:96px;padding:28px 0 48px;border-top:1px solid var(--line);color:var(--mut);font-size:.9rem;display:flex;justify-content:space-between;gap:16px}
+footer a{text-decoration:none}footer a:hover{color:var(--ink)}
 </style></head><body>
 <div class="wrap">
-<nav><span>VideoPacer</span><span><a href="https://www.linkedin.com/in/thomas-lamalle-4a358b94/">LinkedIn</a> &nbsp; <a href="https://github.com/ThomasLamalle/videopacer-showcase">GitHub</a></span></nav>
+<nav><span class="mark">VideoPacer</span><span><a href="https://www.linkedin.com/in/thomas-lamalle-4a358b94/">LinkedIn</a><a href="https://github.com/ThomasLamalle/videopacer-showcase">GitHub</a></span></nav>
 <header class="hero">
-<span class="tag">Work in progress prototype</span>
-<h1>Finish times from <em>a video</em>,<br>no chips.</h1>
+<p class="status">Work in progress prototype</p>
+<h1>Finish times from a video, no chips.</h1>
 <p class="lead">VideoPacer watches a finish line, finds each runner's bib, reads the number and gives every runner a finish time, live, on a phone.</p>
 <div class="shot"><img src="assets/demo.gif" alt="Demo: bibs detected on a finish line with a live race clock and leaderboard" width="1000"></div>
-<p class="cap" style="margin-inline:auto">Honolulu Marathon 2014 footage: detected bibs, race clock read from the video, live leaderboard.</p>
+<p class="cap">Honolulu Marathon 2014 footage: detected bibs, race clock read from the video, live leaderboard.</p>
 </header>
 
 <section><h2>Results</h2>
 <p>Tested on 17 clips of 15 s from real races, labelled by hand and never used in training.</p>
-<div class="grid">
-<div class="card"><b>92%<small> found</small></b><span>172 of 187 bibs read correctly</span></div>
-<div class="card"><b>89%<small> on time</small></b><span>166 of 187 finish times within 2 seconds</span></div>
-<div class="card"><b>33<small> fps</small></b><span>on 4 CPU cores, no GPU: faster than a 30 fps camera</span></div>
-<div class="card"><b>3.7%<small> wrong</small></b><span>7 of 187 bibs read as another number, a run on average</span></div>
+<div class="board">
+<div><b>92<small>%</small></b><strong>found</strong><span>172 of 187 bibs read correctly</span></div>
+<div><b>89<small>%</small></b><strong>on time</strong><span>166 of 187 finish times within 2 seconds</span></div>
+<div><b>33</b><strong>frames per second</strong><span>on 4 CPU cores, no GPU: faster than a 30 fps camera</span></div>
+<div><b>3.7<small>%</small></b><strong>wrong</strong><span>7 of 187 bibs read as another number, a run on average</span></div>
 </div>
 <details><summary>Results per video (mean of 2 runs)</summary>
 <table><tr><th>Video</th><th>Bibs in truth</th><th>Found</th><th>Wrong</th></tr><tr><td>sample1</td><td>11</td><td>10.5</td><td>1</td></tr><tr><td>sample2</td><td>19</td><td>19</td><td>0</td></tr><tr><td>sample3</td><td>22</td><td>22</td><td>2</td></tr><tr><td>sample5</td><td>26</td><td>25.5</td><td>0.5</td></tr><tr><td>sample6</td><td>14</td><td>14</td><td>0</td></tr><tr><td>sample7</td><td>13</td><td>11.5</td><td>0.5</td></tr><tr><td>sample8</td><td>7</td><td>7</td><td>0</td></tr><tr><td>sample9</td><td>10</td><td>6.5</td><td>1</td></tr><tr><td>sample11</td><td>4</td><td>4</td><td>0</td></tr><tr><td>sample13</td><td>10</td><td>5.5</td><td>0.5</td></tr><tr><td>sample14</td><td>10</td><td>9</td><td>0</td></tr><tr><td>sample15</td><td>2</td><td>1.5</td><td>0</td></tr><tr><td>sample16</td><td>5</td><td>3</td><td>0</td></tr><tr><td>sample17</td><td>7</td><td>7</td><td>0</td></tr><tr><td>sample18</td><td>15</td><td>15</td><td>1.5</td></tr><tr><td>sample19</td><td>6</td><td>6</td><td>0</td></tr><tr><td>sample20</td><td>6</td><td>5</td><td>0</td></tr></table></details>
@@ -58,16 +85,16 @@ footer{padding:72px 0 48px;color:var(--mut);font-size:.9rem}
 
 <section><h2>Stack</h2>
 <p>Each camera runs the whole pipeline itself. A server only merges the results of several cameras and is never in the frame loop, so it works live and with a weak connection. Android first, then PC and iPhone.</p>
-<div class="grid">
-<div class="card"><h3>Computer vision</h3><ul><li>Small YOLO-family bib detector</li><li>PP-OCR-style digit reader</li><li>Models trained on bibs, exported to ONNX (int8 and fp32)</li><li>OpenCV for video and image work</li></ul></div>
-<div class="card"><h3>Core</h3><ul><li>Rust, no garbage collector, no Python at run time</li><li>ONNX Runtime inference on CPU</li><li>Frame-by-frame streaming with bounded memory</li><li>Tracking lets the detector run on every other frame, mostly around known runners</li><li>Benchmarked in frames per second</li></ul></div>
-<div class="card"><h3>App</h3><ul><li>Tauri 2 shell for Android</li><li>Embedded web review page and leaderboard</li><li>Race clock read from the video</li></ul></div>
-<div class="card"><h3>Tooling</h3><ul><li>Hand-labelled ground truth with automated scoring</li><li>GitHub Actions, self-hosted runner, APK build</li><li>Models and datasets on Hugging Face</li></ul></div>
+<div class="stack">
+<div><h3>Computer vision</h3><ul><li>Small YOLO-family bib detector</li><li>PP-OCR-style digit reader</li><li>Models trained on bibs, exported to ONNX (int8 and fp32)</li><li>OpenCV for video and image work</li></ul></div>
+<div><h3>Core</h3><ul><li>Rust, no garbage collector, no Python at run time</li><li>ONNX Runtime inference on CPU</li><li>Frame-by-frame streaming with bounded memory</li><li>Tracking lets the detector run on every other frame, mostly around known runners</li><li>Benchmarked in frames per second</li></ul></div>
+<div><h3>App</h3><ul><li>Tauri 2 shell for Android</li><li>Embedded web review page and leaderboard</li><li>Race clock read from the video</li></ul></div>
+<div><h3>Tooling</h3><ul><li>Hand-labelled ground truth with automated scoring</li><li>GitHub Actions, self-hosted runner, APK build</li><li>Models and datasets on Hugging Face</li></ul></div>
 </div></section>
 
 <section><h2>Code</h2>
 <p>The source is private while the project is in progress. Happy to walk through it or share access.</p>
 <a class="cta" href="https://www.linkedin.com/in/thomas-lamalle-4a358b94/">Get in touch on LinkedIn</a>
 </section>
-<footer>© Thomas Lamalle · <a href="https://www.linkedin.com/in/thomas-lamalle-4a358b94/" style="color:inherit">LinkedIn</a></footer>
+<footer><span>© Thomas Lamalle</span><a href="https://www.linkedin.com/in/thomas-lamalle-4a358b94/">LinkedIn</a></footer>
 </div></body></html>
