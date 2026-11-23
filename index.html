@@ -49,7 +49,7 @@ footer{padding:72px 0 48px;color:var(--mut);font-size:.9rem}
 <div class="grid">
 <div class="card"><b>175<small> / 187</small></b><span>bibs found</span></div>
 <div class="card"><b>170<small> / 187</small></b><span>finish times within 2 seconds</span></div>
-<div class="card"><b>2.1×</b><span>real time on 4 CPU cores, no GPU</span></div>
+<div class="card"><b>14<small> fps</small></b><span>on 4 CPU cores, no GPU</span></div>
 <div class="card"><b>0</b><span>chips, mats or hardware at the line</span></div>
 </div>
 <details><summary>Results per video</summary>
@@ -60,7 +60,7 @@ footer{padding:72px 0 48px;color:var(--mut);font-size:.9rem}
 <p>Each camera runs the whole pipeline itself. A server only merges the results of several cameras and is never in the frame loop, so it works live and with a weak connection. Android first, then PC and iPhone.</p>
 <div class="grid">
 <div class="card"><h3>Computer vision</h3><ul><li>Small YOLO-family bib detector</li><li>PP-OCR-style digit reader</li><li>Models trained on bibs, exported to ONNX (int8 and fp32)</li><li>OpenCV for video and image work</li></ul></div>
-<div class="card"><h3>Core</h3><ul><li>Rust, no garbage collector, no Python at run time</li><li>ONNX Runtime inference on CPU</li><li>Frame-by-frame streaming with bounded memory</li><li>Benchmarked in real-time multiples</li></ul></div>
+<div class="card"><h3>Core</h3><ul><li>Rust, no garbage collector, no Python at run time</li><li>ONNX Runtime inference on CPU</li><li>Frame-by-frame streaming with bounded memory</li><li>Benchmarked in frames per second</li></ul></div>
 <div class="card"><h3>App</h3><ul><li>Tauri 2 shell for Android</li><li>Embedded web review page and leaderboard</li><li>Race clock read from the video</li></ul></div>
 <div class="card"><h3>Tooling</h3><ul><li>Hand-labelled ground truth with automated scoring</li><li>GitHub Actions, self-hosted runner, APK build</li><li>Models and datasets on Hugging Face</li></ul></div>
 </div></section>
